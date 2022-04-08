@@ -11,11 +11,11 @@ class FileMatcher {
     matcher.isMatch(pattern, path)
   }
 
-  def getNearestDir(pattern: String) = {
-    stringBefore(stringBefore(stringBefore(stringBefore(pattern, "*"), "?"), "/"), "\\")
+  def getNearestDir(pattern: String): String = {
+    stringBeforeLast(stringBeforeLast(stringBeforeLast(stringBeforeLast(pattern, "*"), "?"), "/"), "\\")
   }
 
-  private def stringBefore(str: String, separator: String): String = {
+  private def stringBeforeLast(str: String, separator: String): String = {
     if (str.contains(separator)) StringUtils.substringBeforeLast(str, separator) else str
   }
 }

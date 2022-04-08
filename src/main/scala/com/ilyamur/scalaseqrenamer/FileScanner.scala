@@ -14,7 +14,8 @@ class FileScanner(fileSystem: FileSystem,
                   fileTools: FileTools) {
 
   def scan(pattern: String): FileListId = {
-    val nearestDirectory = fileMatcher.getNearestDir(pattern)
+    val normPattern = fileTools.normalize(pattern)
+    val nearestDirectory = fileMatcher.getNearestDir(normPattern)
     val path = fileSystem.getPath(nearestDirectory)
     if (!Files.exists(path)) {
       return FileListId(List.empty)
@@ -23,7 +24,7 @@ class FileScanner(fileSystem: FileSystem,
     try {
       val itemList = walk
         .filter(p => !Files.isDirectory(p))
-        .filter(f => fileMatcher.isMatch(pattern, fileTools.normalize(f.toString)))
+        .filter(f => fileMatcher.isMatch(normPattern, fileTools.normalize(f.toString)))
         .map(mapToFileListEntity)
         .collect(Collectors.toList)
         .asScala.toList

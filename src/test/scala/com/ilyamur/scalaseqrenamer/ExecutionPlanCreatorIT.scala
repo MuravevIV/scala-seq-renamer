@@ -70,14 +70,16 @@ class ExecutionPlanCreatorIT {
 
   @Test
   def testCreateWhenPattern(): Unit = {
-    env.fileOpsHelper.createFiles("input", 3)
+    env.fileOpsHelper.createFiles("input", 5)
 
-    val plan = env.executionPlanCreator.create("input/*.jpg", "output/*.jpg", Some(":2"))
+    val plan = env.executionPlanCreator.create("input/*.jpg", "output/*.jpg", Some("2-4"))
 
-    assertThat(plan.actions.size).isEqualTo(3)
+    assertThat(plan.actions.size).isEqualTo(5)
     verifyCreate(plan, 0, 1 -> 1)
-    verifyCreate(plan, 1, 1 -> 2)
-    verifyCreate(plan, 2, 3 -> 3)
+    verifyCreate(plan, 1, 2 -> 2)
+    verifyCreate(plan, 2, 2 -> 3)
+    verifyCreate(plan, 3, 4 -> 4)
+    verifyCreate(plan, 4, 5 -> 5)
   }
 
   // ========
@@ -100,7 +102,7 @@ class ExecutionPlanCreatorIT {
   }
 
   extension (a: Any) {
-    def as[T: ClassTag]: T = {
+    def as[T <: FileAction : ClassTag]: T = {
       val classTag = implicitly[ClassTag[T]]
       assertThat(a.getClass).isEqualTo(classTag.runtimeClass)
       a.asInstanceOf[T]

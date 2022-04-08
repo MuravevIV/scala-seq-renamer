@@ -1,5 +1,9 @@
 package com.ilyamur.scalaseqrenamer
 
+import org.slf4j.LoggerFactory
+
+import java.time.Clock
+
 class ApplicationRunner(executionPlanCreator: ExecutionPlanCreator,
                         executionPlanRunner: ExecutionPlanRunner) {
 

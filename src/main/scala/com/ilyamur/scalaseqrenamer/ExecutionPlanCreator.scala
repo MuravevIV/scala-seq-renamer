@@ -1,5 +1,7 @@
 package com.ilyamur.scalaseqrenamer
 
+import com.ilyamur.scalaseqrenamer.projector.Projector
+
 import java.nio.file.FileSystem
 
 class ExecutionPlanCreator(fileSystem: FileSystem,
@@ -15,21 +17,16 @@ class ExecutionPlanCreator(fileSystem: FileSystem,
     val trgPosList = trgFilesList.files.map(_.pos)
     val posList = (srcPosList ::: trgPosList).distinct.sorted
 
-    val pattern = optPattern match {
-      case Some(str) =>
-        val min = if (srcPosList.nonEmpty) srcPosList.min else 1
-        val max = if (srcPosList.nonEmpty) srcPosList.max else Int.MaxValue
-        Pattern(str, min, max)
-      case _ =>
-        Pattern.direct
-    }
+    val min = if (srcPosList.nonEmpty) srcPosList.min else 1
+    val max = if (srcPosList.nonEmpty) srcPosList.max else Int.MaxValue
+    val projector = new Projector(optPattern.getOrElse(""), min, max)
 
     val actions: List[FileAction] = posList.map { pos =>
       val optTrgFile = trgFilesList.files.find(_.pos == pos)
+      val srcPos = projector.project(pos)
+      val optSrcFile = srcFilesList.files.find(_.pos == srcPos)
       optTrgFile match {
         case Some(trgFile) =>
-          val srcPos = pattern.project(pos)
-          val optSrcFile = srcFilesList.files.find(_.pos == srcPos)
           optSrcFile match {
             case Some(srcFile) =>
               Overwrite(srcFile, trgFile)
@@ -37,8 +34,6 @@ class ExecutionPlanCreator(fileSystem: FileSystem,
               Delete(trgFile)
           }
         case _ =>
-          val srcPos = pattern.project(pos)
-          val optSrcFile = srcFilesList.files.find(_.pos == srcPos)
           optSrcFile match {
             case Some(srcFile) =>
               val optTemplateFile = srcFilesList.files.find(_.pos == pos)
